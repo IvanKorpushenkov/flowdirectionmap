@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 
-os.chdir('/home/roizmsu/FLOW')
+os.chdir('/home/ivan/FLOW')
 
 def fileReading(name):
 
@@ -33,6 +33,7 @@ def numToDegrees(types, file):
             lon_deg += 0.5
             Lon_deg.append(lon_deg)
             i += 1
+        Lon_deg[259199] = 179.5
         outFile = Lon_deg
     elif types == 'lat':
         Lat_deg = []
@@ -73,15 +74,19 @@ Lat = fileReading('lat.txt')
 nextx = fileReading('nextx.txt')
 nexty = fileReading('nexty.txt')
 
-
 Lon_deg = numToDegrees('lon', Lon)
 Lat_deg = numToDegrees('lat', Lat)
 
 lonGrids = {}
 i = 0
 while i < 720:
+    if i == 719:
+        lonGrids[Lon[i]] = 179.5
+        i += 1
+        continue
     lonGrids[Lon[i]] = Lon_deg[i]
     i += 1
+
 
 latGrids = {}
 i = 0
@@ -90,36 +95,78 @@ while i < len(Lat):
         latGrids[Lat[i]] = Lat_deg[i]
     i += 1
 
-print(latGrids)
+nextx_deg = []
+for i in range(len(Lon_deg)):
+    if nextx[i] != -9999:
+        nextx_deg.append(lonGrids.get(nextx[i]))
+    elif nextx[i] == -9999:
+        nextx_deg.append(-9999)
+    elif nextx[i] == -9:
+        nextx_deg.append(Lon_deg[i])
+
+nexty_deg = []
+for i in range(len(Lat_deg)):
+    if nexty[i] != -9999:
+        nexty_deg.append(latGrids.get(nexty[i]))
+    elif nexty[i] == -9999:
+        nexty_deg.append(-9999)
+    elif nexty[i] == -9:
+        nexty_deg.append(Lat_deg[i])
+
+#for i in range(len(nextx_deg)):
+#    print(nextx[i])
+#    print(nextx_deg[i])
 
 
 #2.Map vizualization
 
 # General map information
-#map = Basemap(lat_0=-90,
-#              lon_0=0,
-#              llcrnrlat=54, #lat of South-west
-#              llcrnrlon=104, #lon of south-west
-#              urcrnrlat=74, #lat of North-east
-#              urcrnrlon=133, #lon of north-east
-#              resolution='i')
+map = Basemap(lat_0=-90,
+              lon_0=0,
+              llcrnrlat=54, #lat of South-west
+              llcrnrlon=104, #lon of south-west
+              urcrnrlat=74, #lat of North-east
+              urcrnrlon=133, #lon of north-east
+              resolution='i')
 
 #map.shadedrelief()
-#map.drawcoastlines()
-#map.drawcountries()
-#map.drawrivers(color='red')
+map.drawcoastlines()
+map.drawcountries()
+map.drawrivers(color='red')
 
 
 # Draw parallels
-#parallels = np.arange(-90, 90, 0.5)
-#map.drawparallels(parallels,
-#                  linewidth=0.2,
-#                  dashes=[0.1, 0],
-#                  labels=[True, False, False, False])
+parallels = np.arange(-90, 90, 0.5)
+map.drawparallels(parallels,
+                  linewidth=0.2,
+                  dashes=[0.1, 0],
+                  labels=[True, False, False, False])
 
 # Draw meridinas
-#meridians = np.arange(-180, 180, 0.5)
-#map.drawmeridians(meridians,
-#                  linewidth=0.2,
-#                  dashes=[0.1, 0],
-#                  labels=[False, False, False, True])
+meridians = np.arange(-180, 180, 0.5)
+map.drawmeridians(meridians,
+                  linewidth=0.2,
+                  dashes=[0.1, 0],
+                  labels=[False, False, False, True])
+
+#X = Lon_deg[i]
+#Y = Lat_deg[i]
+#U = nextx_deg[i]
+#V = nexty_deg[i]
+
+
+map.quiver(133, 74, 132, 72, angles='xy', scale_units='xy', scale=1)
+
+#for i in range(len(Lon_deg)):
+#    if nextx_deg[i] != -9999 and nexty_deg[i] != -9999:
+#        X = Lon_deg[i]
+#        Y = Lat_deg[i]
+#        U = nextx_deg[i]
+#        V = nexty_deg[i]
+#        map.quiver(X, Y, U,
+#                   V, angles='xy', scale_units='xy', scale=1)
+#        map.quiver(X, Y, U, V)
+
+
+plt.title("The Yellow river (Huang He) basin flow direction".format(1))
+plt.show()
