@@ -1,9 +1,10 @@
-import os, math
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 
-os.chdir('/home/ivan/FLOW')
+
+os.chdir('/home/roizmsu/FLOW')
 
 def fileReading(name):
 
@@ -40,24 +41,24 @@ def numToDegrees(types, file):
         i = 0
         while i < len(file):
             if file[i] == 1:
-                lat_deg = -90
+                lat_deg = 90
                 lat_deg0 = lat_deg
                 Lat_deg.append(lat_deg)
                 i += 1
                 continue
             elif file[i] == 360:
-                lat_deg = 90
+                lat_deg = -90
                 Lat_deg.append(lat_deg)
                 i += 1
                 continue
             if i > 0:
                 if file[i] != 1 or file[i] != 360:
-                    lat_deg = lat_deg0 + 0.5
+                    lat_deg = lat_deg0 - 0.5
                     Lat_deg.append(lat_deg)
                     i += 1
                     if file[i] != file[i-1]:
                         lat_deg0 = lat_deg
-                        lat_deg = lat_deg0 + 0.5
+                        lat_deg = lat_deg0 - 0.5
                         Lat_deg.append(lat_deg)
                         i += 1
                         continue
@@ -87,7 +88,6 @@ while i < 720:
     lonGrids[Lon[i]] = Lon_deg[i]
     i += 1
 
-
 latGrids = {}
 i = 0
 while i < len(Lat):
@@ -95,14 +95,13 @@ while i < len(Lat):
         latGrids[Lat[i]] = Lat_deg[i]
     i += 1
 
+
 nextx_deg = []
 for i in range(len(Lon_deg)):
     if nextx[i] != -9999:
         nextx_deg.append(lonGrids.get(nextx[i]))
     elif nextx[i] == -9999:
         nextx_deg.append(-9999)
-    elif nextx[i] == -9:
-        nextx_deg.append(Lon_deg[i])
 
 nexty_deg = []
 for i in range(len(Lat_deg)):
@@ -110,13 +109,6 @@ for i in range(len(Lat_deg)):
         nexty_deg.append(latGrids.get(nexty[i]))
     elif nexty[i] == -9999:
         nexty_deg.append(-9999)
-    elif nexty[i] == -9:
-        nexty_deg.append(Lat_deg[i])
-
-#for i in range(len(nextx_deg)):
-#    print(nextx[i])
-#    print(nextx_deg[i])
-
 
 #2.Map vizualization
 
@@ -124,16 +116,16 @@ for i in range(len(Lat_deg)):
 map = Basemap(lat_0=-90,
               lon_0=0,
               llcrnrlat=54, #lat of South-west
-              llcrnrlon=104, #lon of south-west
+              llcrnrlon=110, #lon of south-west
               urcrnrlat=74, #lat of North-east
               urcrnrlon=133, #lon of north-east
-              resolution='i')
+              resolution='h')
 
-#map.shadedrelief()
+map.shadedrelief()
 map.drawcoastlines()
 map.drawcountries()
-map.drawrivers(color='red')
-
+map.drawrivers(color='blue')
+map.etopo()
 
 # Draw parallels
 parallels = np.arange(-90, 90, 0.5)
@@ -149,24 +141,25 @@ map.drawmeridians(meridians,
                   dashes=[0.1, 0],
                   labels=[False, False, False, True])
 
-#X = Lon_deg[i]
-#Y = Lat_deg[i]
-#U = nextx_deg[i]
-#V = nexty_deg[i]
 
 
-map.quiver(133, 74, 132, 72, angles='xy', scale_units='xy', scale=1)
+for i in range(len(Lon_deg)):
+    if Lon_deg[i] > 104 and Lon_deg[i] < 135:
+        if nextx_deg[i] != -9999 and nexty_deg[i] != -9999 and nextx_deg[i] != None \
+                and nexty_deg[i] != None:
+            X = Lon_deg[i]
+            Y = Lat_deg[i]
+            U = float(nextx_deg[i]) - float(Lon_deg[i])
+            V = float(nexty_deg[i]) - float(Lat_deg[i])
+            map.quiver(X, Y, U, V,
+                       angles='xy', scale_units='xy', scale=1, width=0.005, color='red')
+        elif nextx_deg[i] == None and nextx_deg[i] == None:
+            X = Lon_deg[i]
+            Y = Lat_deg[i]
+            map.plot(X, Y, color='red')
 
-#for i in range(len(Lon_deg)):
-#    if nextx_deg[i] != -9999 and nexty_deg[i] != -9999:
-#        X = Lon_deg[i]
-#        Y = Lat_deg[i]
-#        U = nextx_deg[i]
-#        V = nexty_deg[i]
-#        map.quiver(X, Y, U,
-#                   V, angles='xy', scale_units='xy', scale=1)
-#        map.quiver(X, Y, U, V)
 
 
-plt.title("The Yellow river (Huang He) basin flow direction".format(1))
+plt.title("Your text".format(1))
 plt.show()
+
