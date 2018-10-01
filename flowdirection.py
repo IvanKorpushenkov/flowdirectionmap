@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 
-
 os.chdir('/home/roizmsu/FLOW')
 
 def fileReading(name):
@@ -69,9 +68,41 @@ def numToDegrees(types, file):
     return outFile
 
 
+def toGrid(arr1, arr2, Lon, Lat):
+
+    lonGrids = {}
+    i = 0
+    while i < 720:
+        if i == 719:
+            lonGrids[Lon[i]] = 179.5
+            i += 1
+            continue
+        lonGrids[Lon[i]] = Lon_deg[i]
+        i += 1
+
+    latGrids = {}
+    i = 0
+    while i < len(Lat):
+        if i % 720 == 0:
+            latGrids[Lat[i]] = Lat_deg[i]
+        i += 1
+
+    deg = []
+    for i in range(len(arr1)):
+        if arr2[i] != -9:
+            if arr2[i] != -9999:
+                deg.append(float(lonGrids.get(arr2[i])))
+            elif arr2[i] == -9999:
+                deg.append(-9999)
+        elif arr2[i] == -9:
+            deg.append(float(arr1[i]))
+
+    return deg
+
 #1.data_processing
 Lon = fileReading('lon.txt')
 Lat = fileReading('lat.txt')
+
 nextx = fileReading('nextx.txt')
 nexty = fileReading('nexty.txt')
 
@@ -95,24 +126,30 @@ while i < len(Lat):
         latGrids[Lat[i]] = Lat_deg[i]
     i += 1
 
-
 nextx_deg = []
 for i in range(len(Lon_deg)):
-    if nextx[i] != -9999:
-        nextx_deg.append(lonGrids.get(nextx[i]))
-    elif nextx[i] == -9999:
-        nextx_deg.append(-9999)
+    if nextx[i] != -9:
+        if nextx[i] != -9999:
+            nextx_deg.append(float(lonGrids.get(nextx[i])))
+        elif nextx[i] == -9999:
+            nextx_deg.append(-9999)
+    elif nextx[i] == -9:
+        nextx_deg.append(float(Lon_deg[i]))
 
 nexty_deg = []
 for i in range(len(Lat_deg)):
-    if nexty[i] != -9999:
-        nexty_deg.append(latGrids.get(nexty[i]))
-    elif nexty[i] == -9999:
-        nexty_deg.append(-9999)
+    if nexty[i] != -9:
+        if nexty[i] != -9999:
+            nexty_deg.append(float(latGrids.get(nexty[i])))
+        elif nexty[i] == -9999:
+            nexty_deg.append(-9999)
+    elif nexty[i] == -9:
+        nexty_deg.append(float(Lat_deg[i]))
+
 
 #2.Map vizualization
 
-# General map information
+# Map metadata
 map = Basemap(lat_0=-90,
               lon_0=0,
               llcrnrlat=54, #lat of South-west
@@ -121,11 +158,11 @@ map = Basemap(lat_0=-90,
               urcrnrlon=133, #lon of north-east
               resolution='h')
 
-map.shadedrelief()
+#map.shadedrelief()
 map.drawcoastlines()
 map.drawcountries()
 map.drawrivers(color='blue')
-map.etopo()
+#map.etopo()
 
 # Draw parallels
 parallels = np.arange(-90, 90, 0.5)
@@ -142,24 +179,100 @@ map.drawmeridians(meridians,
                   labels=[False, False, False, True])
 
 
-
+'''
+#D8
 for i in range(len(Lon_deg)):
     if Lon_deg[i] > 104 and Lon_deg[i] < 135:
-        if nextx_deg[i] != -9999 and nexty_deg[i] != -9999 and nextx_deg[i] != None \
-                and nexty_deg[i] != None:
+        if nextx_deg[i] != -9999 and nexty_deg[i] != -9999:
             X = Lon_deg[i]
             Y = Lat_deg[i]
             U = float(nextx_deg[i]) - float(Lon_deg[i])
             V = float(nexty_deg[i]) - float(Lat_deg[i])
-            map.quiver(X, Y, U, V,
-                       angles='xy', scale_units='xy', scale=1, width=0.005, color='red')
-        elif nextx_deg[i] == None and nextx_deg[i] == None:
+            if abs(U) <= 0.5 and abs(V) <= 0.5:
+                map.quiver(X + 0.25, Y + 0.25, U, V,
+                           angles='xy', scale_units='xy', scale=1, width=0.001, color='red')
+'''
+
+'''
+#D8_plus
+for i in range(len(Lon_deg)):
+    if Lon_deg[i] > 104 and Lon_deg[i] < 135:
+        if nextx_deg[i] != -9999 and nexty_deg[i] != -9999:
             X = Lon_deg[i]
             Y = Lat_deg[i]
-            map.plot(X, Y, color='red')
+            U = float(nextx_deg[i]) - float(Lon_deg[i])
+            V = float(nexty_deg[i]) - float(Lat_deg[i])
+            if U != 0 and V != 0:
+                if abs(U) > 0.5 and abs(V) > 0.5:
+                    if (abs(U) + abs(V)) % U == 0 or \
+                            (abs(U) + abs(V)) % V == 0:
+                        map.quiver(X + 0.25, Y + 0.25, U, V,
+                                   angles='xy', scale_units='xy', scale=1, width=0.001, color='red')
+
+                elif abs(U) <= 0.5 and abs(V) <= 0.5:
+                    pass
+            elif U == 0:
+                if abs(V) > 0.5:
+                    if abs(U + V) % V == 0:
+                        map.quiver(X + 0.25, Y + 0.25, U, V,
+                                   angles='xy', scale_units='xy', scale=1, width=0.001, color='red')
+
+            elif V == 0:
+                if abs(U) > 0.5:
+                    if abs(U + V) % U == 0:
+                        map.quiver(X + 0.25, Y + 0.25, U, V,
+                                   angles='xy', scale_units='xy', scale=1, width=0.001, color='red')
+'''
 
 
+'''
+#- (D8 + D8_plus)
+for i in range(len(Lon_deg)):
+    if Lon_deg[i] > 104 and Lon_deg[i] < 135:
+        if nextx_deg[i] != -9999 and nexty_deg[i] != -9999:
+            X = Lon_deg[i]
+            Y = Lat_deg[i]
+            U = float(nextx_deg[i]) - float(Lon_deg[i])
+            V = float(nexty_deg[i]) - float(Lat_deg[i])
+            if U != 0 and V != 0:
+                if abs(U) > 0.5 and abs(V) > 0.5:
+                    if (abs(U) + abs(V)) % U == 0 or \
+                            (abs(U) + abs(V)) % V == 0:
+                        pass
+                elif abs(U) <= 0.5 and abs(V) <= 0.5:
+                    pass
+                else:
+                    map.quiver(X + 0.25, Y + 0.25, U, V,
+                               angles='xy', scale_units='xy', scale=1, width=0.001, color='black')
+            elif U == 0:
+                if abs(V) > 0.5:
+                    if abs(U + V) % V == 0:
+                        pass
+            elif V == 0:
+                if abs(U) > 0.5:
+                    if abs(U + V) % U == 0:
+                        pass
+'''
 
-plt.title("Your text".format(1))
+'''
+for i in range(len(Lon_deg)):
+    if Lon_deg[i] > 104 and Lon_deg[i] < 135:
+        if nextx_deg[i] != -9999 and nexty_deg[i] != -9999:
+            X = Lon_deg[i]
+            Y = Lat_deg[i]
+            U = float(nextx_deg[i]) - float(Lon_deg[i])
+            V = float(nexty_deg[i]) - float(Lat_deg[i])
+            if ((X + U) - X) == 0.5 and ((Y + V) - Y) == 0.5:
+#                print(X, end=' ')
+#                print(Y, end=' ')
+#                print(X + U, end=' ')
+#                print(Y + V)
+                map.quiver(X + 0.25, Y + 0.25, U, V,
+                           angles='xy', scale_units='xy', scale=1, width=0.001, color='green')
+#            elif ((X + U) - X) != 0.5 and ((Y + V) - Y) != 0.5:
+#                map.quiver(X + 0.25, Y + 0.25, U, V,
+#                           angles='xy', scale_units='xy', scale=1, width=0.001, color='red')
+'''
+
+plt.title("D8_plus".format(1))
 plt.show()
-
