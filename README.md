@@ -3,4 +3,4 @@ River routing scheme vizualize by FLOW (Yamazaki D. et al.)
 
 
 # flowPlot.py plot results
-![result](master/Lena_mod.png)
+![result](Lena_mod.png)
