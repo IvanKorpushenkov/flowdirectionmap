@@ -1,9 +1,9 @@
 # flowdirectionmap
-River routing scheme vizualize by FLOW (Yamazaki D. et al.)
+River routing scheme from FLOW (Yamazaki D. et al.)
 
 
 # flowPlot.py plot results
 
-We're use shapes such as https://www.ngdc.noaa.gov/mgg/shorelines/
+We use shapes such as https://www.ngdc.noaa.gov/mgg/shorelines/
 
 ![result](Lena_mod.png)
