@@ -8,7 +8,18 @@ Ivan Korpushenkov, Lomonosov MSU, land hydrology
 import os
 import math
 
-os.chdir('/home/roizmsu/FLOW')
+os.chdir('D:\Магистерская\Статья в журнал по D8\данные')
+
+def printing(name, var):
+
+    os.chdir('D:\Магистерская\Статья в журнал по D8\данные')
+
+    f = open(name, 'w')
+    for i in range(len(var)):
+        f.write(str(var[i]) + '\n')
+    f.close()
+
+    return
 
 def fileReading(name):
 
@@ -18,7 +29,6 @@ def fileReading(name):
         dim.append(float(line))
 
     return dim
-
 
 #1.data_processing
 Lon = fileReading('lon.txt')
@@ -74,7 +84,6 @@ while i < len(Lon):
     Lat_deg.append(latGrids.get(Lat[i]))
     i += 1
 
-
 nextx_deg = []
 for i in range(len(Lon_deg)):
     if nextx[i] != -9:
@@ -97,7 +106,6 @@ for i in range(len(Lat_deg)):
             nexty_deg.append(-9999)
     elif nexty[i] == -9:
         nexty_deg.append(Lat_deg[i])
-
 
 #D8_plus_to_D8
 for i in range(len(Lon_deg)):
@@ -230,29 +238,22 @@ for i in range(len(Lon_deg)):
                         Y = nexty_deg[i + j]
                         j += 1
 
-
 #reverse_latitude_coordinates
 Lat_deg.reverse()
 nexty_deg.reverse()
-
 
 #grid_shifting
 for i in range(len(Lon_deg)):
+    Lon_deg[i] = Lon_deg[i] + 0.25
+    Lat_deg[i] = Lat_deg[i] + 0.25
     if nextx_deg[i] != -9999 and nexty_deg[i] != -9999:
-        Lon_deg[i] = Lon_deg[i] + 0.25
-        Lat_deg[i] = Lat_deg[i] + 0.25
         nextx_deg[i] = nextx_deg[i] + 0.25
         nexty_deg[i] = nexty_deg[i] + 0.25
         continue
-    elif nextx_deg[i] == -9999 and nexty_deg[i] == -9999:
-        Lon_deg[i] = Lon_deg[i] + 0.25
-        Lat_deg[i] = Lat_deg[i] + 0.25
-
 
 #reverse_latitude_coordinates
 Lat_deg.reverse()
 nexty_deg.reverse()
-
 
 #degree_to_D8
 #flow_directions
@@ -299,7 +300,6 @@ for i in range(len(Lon_deg)):
             flowDirectionsD8.append(9)
             continue
         else:
-            print(Lon_deg[i], Lat_deg[i], nextx_deg[i], nexty_deg[i])
             flowDirectionsD8.append(9)
     else:
         flowDirectionsD8.append(-9999)
