@@ -1,18 +1,11 @@
-'''
-
-Ivan Korpushenkov, Lomonosov MSU, land hydrology
-
-'''
-
-
 import os
 import math
 
-os.chdir('D:\Магистерская\Статья в журнал по D8\данные')
+os.chdir('/home/roizmsu/FLOW/DAT')
 
 def printing(name, var):
 
-    os.chdir('D:\Магистерская\Статья в журнал по D8\данные')
+    os.chdir('/home/roizmsu/FLOW/OUT')
 
     f = open(name, 'w')
     for i in range(len(var)):
@@ -30,12 +23,62 @@ def fileReading(name):
 
     return dim
 
+def degComparison(X, Y, nextx_deg, nexty_deg):
+
+    degrees = [0, 45, 90,
+               135, 180, 225,
+               270, 315, 360]
+
+    fin_nx = nextx_deg
+    fin_ny = nexty_deg
+
+    if Y < nexty_deg and X < nextx_deg:
+        tan_phi = (Y - fin_ny) / (X - fin_nx)
+        linearPhi = math.degrees(math.atan(tan_phi))
+    elif X > nextx_deg and Y < nexty_deg:
+        tan_phi = (Y - fin_ny) / (X - fin_nx)
+        linearPhi = 90 + math.degrees(math.atan(tan_phi))
+    elif X > nextx_deg and Y > nexty_deg:
+        tan_phi = (Y - fin_ny) / (X - fin_nx)
+        linearPhi = 180 + math.degrees(math.atan(tan_phi))
+    elif X < nextx_deg and Y > nexty_deg:
+        tan_phi = (Y - fin_ny) / (X - fin_nx)
+        linearPhi = 360 - abs(math.degrees(math.atan(tan_phi)))
+
+    mins = []
+    for i in range(len(degrees)):
+        mins.append(abs(linearPhi - degrees[i]))
+
+    for i in range(len(degrees)):
+        if mins[i] == min(mins):
+            linearPhi = degrees[i]
+
+
+    return linearPhi
+
+'''
+def intersections(X, Y):
+
+    for i in range(len()):
+        X = Lon_deg[i]
+        Y = Lat_deg[i]
+        for j in range(len()):
+            if nextx_deg[j] == X and nexty_deg[j] == Y:
+                print(i)
+
+
+    return
+'''
+
+
 #1.data_processing
 Lon = fileReading('lon.txt')
 Lat = fileReading('lat.txt')
 
 nextx = fileReading('nextx.txt')
 nexty = fileReading('nexty.txt')
+
+riverWidth = fileReading('rivwth.txt')
 
 #some_dictionaries
 direction_u = {0: 0.5, 45: 0.5, 90: 0,
@@ -107,6 +150,185 @@ for i in range(len(Lat_deg)):
     elif nexty[i] == -9:
         nexty_deg.append(Lat_deg[i])
 
+
+#to cell centre (19.02 added)
+for i in range(len(Lon_deg)):
+    if Lon_deg[i] != -9999 and Lat_deg[i] != -9999:
+        Lon_deg[i] += 0.25
+        Lat_deg[i] += 0.25
+    else:
+        pass
+
+for i in range(len(Lon_deg)):
+    if nextx_deg[i] != -9999 and nexty_deg[i] != -9999:
+        nextx_deg[i] += 0.25
+        nexty_deg[i] += 0.25
+    else:
+        pass
+
+
+'''
+#intersections_finder (added 20.02)
+#тут надо на два условия проверять, в т.ч or
+#не только and
+
+iies = []
+jjes = []
+#2.0 (22.02, 19:50) -- ok!
+for i in range(len(Lon_deg)):
+    for j in range(len(Lon_deg)):
+        if Lon_deg[i] != -9999 and Lat_deg[i] != -9999 and \
+                Lon_deg[j] != -9999 and Lat_deg[j] != -9999:
+            if Lon_deg[i] == nextx_deg[j] and \
+                    Lat_deg[i] == nexty_deg[j] and \
+                    Lon_deg[j] == nextx_deg[i] and \
+                    Lat_deg[j] == nexty_deg[i] and \
+                    i != j:
+                iies.append(i)
+                jjes.append(j)
+            elif Lon_deg[i] == nextx_deg[j] and \
+                    Lat_deg[i] == nexty_deg[j] and \
+                    i != j:
+                iies.append(i)
+                jjes.append(j)
+'''
+
+#printing('iies.txt', iies)
+#printing('jjes.txt', jjes)
+
+
+'''
+#D8_plus_to_D8 (modified 20.02)
+for i in range(len(Lon_deg)):
+    if nextx_deg[i] != -9999 and nexty_deg[i] != -9999:
+        X = Lon_deg[i]
+        Y = Lat_deg[i]
+        U = nextx_deg[i] - Lon_deg[i]
+        V = nexty_deg[i] - Lat_deg[i]
+        if U != 0 and V != 0:
+            if abs(U) > 0.5 and abs(V) > 0.5:
+                if (abs(U) + abs(V)) % U == 0 or \
+                        (abs(U) + abs(V)) % V == 0:
+                    if X < nextx_deg[i] and Y < nexty_deg[i]:
+                        numU = abs(int(U / 0.5))
+                        numV = abs(int(V / 0.5))
+                        maxNum = max(numU, numV)
+                        j = 0
+                        while j < maxNum:
+                            nextx_deg[i + j] = X + 0.5
+                            nexty_deg[i + j] = Y + 0.5
+                            X = nextx_deg[i + j]
+                            Y = nexty_deg[i + j]
+#                            riverWidth[i + j] = riverWidth[i]
+                            j += 1
+                            continue
+                    elif X > nextx_deg[i] and Y < nexty_deg[i]:
+                        numU = abs(int(U / 0.5))
+                        numV = abs(int(V / 0.5))
+                        maxNum = max(numU, numV)
+                        j = 0
+                        while j < maxNum:
+                            nextx_deg[i + j] = X - 0.5
+                            nexty_deg[i + j] = Y + 0.5
+                            X = nextx_deg[i + j]
+                            Y = nexty_deg[i + j]
+#                            riverWidth[i + j] = riverWidth[i]
+                            j += 1
+                            continue
+                    elif X > nextx_deg[i] and Y > nexty_deg[i]:
+                        numU = abs(int(U / 0.5))
+                        numV = abs(int(V / 0.5))
+                        maxNum = max(numU, numV)
+                        j = 0
+                        while j < maxNum:
+                            nextx_deg[i + j] = X - 0.5
+                            nexty_deg[i + j] = Y - 0.5
+                            X = nextx_deg[i + j]
+                            Y = nexty_deg[i + j]
+#                            riverWidth[i + j] = riverWidth[i]
+                            j += 1
+                            continue
+                    elif X < nextx_deg[i] and Y > nexty_deg[i]:
+                        numU = abs(int(U / 0.5))
+                        numV = abs(int(V / 0.5))
+                        maxNum = max(numU, numV)
+                        j = 0
+                        while j < maxNum:
+                            nextx_deg[i + j] = X + 0.5
+                            nexty_deg[i + j] = Y - 0.5
+                            X = nextx_deg[i + j]
+                            Y = nexty_deg[i + j]
+#                            riverWidth[i + j] = riverWidth[i]
+                            j += 1
+                            continue
+            elif abs(U) > 0.5 or abs(V) > 0.5:
+                numU = abs(int(U / 0.5))
+                numV = abs(int(V / 0.5))
+                numMax = max(numU, numV)
+                linearPhi = degComparison(X, Y,
+                                          nextx_deg[i], nexty_deg[i])
+                U = direction_u.get(linearPhi)
+                V = direction_v.get(linearPhi)
+                nextx_deg[i] = X + U
+                nexty_deg[i] = Y + V
+                X = nextx_deg[i]
+                Y = nexty_deg[i]
+                continue
+        if V == 0:
+            if abs(U) > 0.5:
+                if nextx_deg[i] > X:
+                    length = int(abs(V) / 0.5)
+                    j = 0
+                    while j <= length:
+                        nextx_deg[i + j] = X + 0.5
+                        X = nextx_deg[i + j]
+#                        riverWidth[i + j] = riverWidth[i]
+                        j += 1
+                        continue
+                if nextx_deg[i] < X:
+                    length = int(abs(V) / 0.5)
+                    j = 0
+                    while j <= length:
+                        nextx_deg[i + j] = X - 0.5
+                        X = nextx_deg[i + j]
+#                        riverWidth[i + j] = riverWidth[i]
+                        j += 1
+                        continue
+        elif U == 0:
+            if abs(V) > 0.5:
+                if nexty_deg[i] > Y:
+                    length = int(abs(U) / 0.5)
+                    j = 0
+                    while j <= length:
+                        nexty_deg[i + j] = Y + 0.5
+                        Y = nexty_deg[i + j]
+#                        riverWidth[i + j] = riverWidth[i]
+                        j += 1
+                        continue
+                if nexty_deg[i] < Y:
+                    length = int(abs(U) / 0.5)
+                    j = 0
+                    while j <= length:
+                        nexty_deg[i + j] = Y - 0.5
+#                        riverWidth[i + j] = riverWidth[i]
+                        Y = nexty_deg[i + j]
+                        j += 1
+'''
+
+'''
+for i in range(len(Lon_deg)):
+    if Lat_deg[i] == 64.75:
+        print(Lon_deg[i], riverWidth[i])
+#    if Lon_deg[i] == 41.75 and Lat_deg[i] == 64.25:
+#        print(riverWidth[i])
+#    if Lon_deg[i] == 40.75 and Lat_deg[i] == 64.75:
+#        print(riverWidth[i])
+'''
+
+
+
+
+'''
 #D8_plus_to_D8
 for i in range(len(Lon_deg)):
     if nextx_deg[i] != -9999 and nexty_deg[i] != -9999:
@@ -128,6 +350,7 @@ for i in range(len(Lon_deg)):
                             nexty_deg[i + j] = Y + 0.5
                             X = nextx_deg[i + j]
                             Y = nexty_deg[i + j]
+                            riverWidth[i + j] = riverWidth[i]
                             j += 1
                             continue
                     elif X > nextx_deg[i] and Y < nexty_deg[i]:
@@ -140,6 +363,7 @@ for i in range(len(Lon_deg)):
                             nexty_deg[i + j] = Y + 0.5
                             X = nextx_deg[i + j]
                             Y = nexty_deg[i + j]
+                            riverWidth[i + j] = riverWidth[i]
                             j += 1
                             continue
                     elif X > nextx_deg[i] and Y > nexty_deg[i]:
@@ -152,6 +376,7 @@ for i in range(len(Lon_deg)):
                             nexty_deg[i + j] = Y - 0.5
                             X = nextx_deg[i + j]
                             Y = nexty_deg[i + j]
+                            riverWidth[i + j] = riverWidth[i]
                             j += 1
                             continue
                     elif X < nextx_deg[i] and Y > nexty_deg[i]:
@@ -164,6 +389,7 @@ for i in range(len(Lon_deg)):
                             nexty_deg[i + j] = Y - 0.5
                             X = nextx_deg[i + j]
                             Y = nexty_deg[i + j]
+                            riverWidth[i + j] = riverWidth[i]
                             j += 1
                             continue
             elif abs(U) > 0.5 or abs(V) > 0.5:
@@ -210,6 +436,7 @@ for i in range(len(Lon_deg)):
                     while j <= length:
                         nextx_deg[i + j] = X + 0.5
                         X = nextx_deg[i + j]
+                        riverWidth[i + j] = riverWidth[i]
                         j += 1
                         continue
                 if nextx_deg[i] < X:
@@ -218,6 +445,7 @@ for i in range(len(Lon_deg)):
                     while j <= length:
                         nextx_deg[i + j] = X - 0.5
                         X = nextx_deg[i + j]
+                        riverWidth[i + j] = riverWidth[i]
                         j += 1
                         continue
         elif U == 0:
@@ -228,6 +456,7 @@ for i in range(len(Lon_deg)):
                     while j <= length:
                         nexty_deg[i + j] = Y + 0.5
                         Y = nexty_deg[i + j]
+                        riverWidth[i + j] = riverWidth[i]
                         j += 1
                         continue
                 if nexty_deg[i] < Y:
@@ -235,26 +464,31 @@ for i in range(len(Lon_deg)):
                     j = 0
                     while j <= length:
                         nexty_deg[i + j] = Y - 0.5
+                        riverWidth[i + j] = riverWidth[i]
                         Y = nexty_deg[i + j]
                         j += 1
+'''
 
-#reverse_latitude_coordinates
-Lat_deg.reverse()
-nexty_deg.reverse()
+'''
+#intersections_test
+i = 0
+j = 0
+while i < len(Lon_deg):
+    x = Lon_deg[i]
+    y = Lat_deg[i]
+    while j < len(Lon_deg):
+        if nextx_deg[j] == x and nexty_deg[j] == y:
+            print(Lon_deg[i])
+            j = 0
+            continue
+        else:
+            j += 1
+            i += 1
+            continue
+    i +=1
+'''
 
-#grid_shifting
-for i in range(len(Lon_deg)):
-    Lon_deg[i] = Lon_deg[i] + 0.25
-    Lat_deg[i] = Lat_deg[i] + 0.25
-    if nextx_deg[i] != -9999 and nexty_deg[i] != -9999:
-        nextx_deg[i] = nextx_deg[i] + 0.25
-        nexty_deg[i] = nexty_deg[i] + 0.25
-        continue
-
-#reverse_latitude_coordinates
-Lat_deg.reverse()
-nexty_deg.reverse()
-
+'''
 #degree_to_D8
 #flow_directions
 #1 2 3
@@ -304,3 +538,12 @@ for i in range(len(Lon_deg)):
     else:
         flowDirectionsD8.append(-9999)
         continue
+
+
+printing('LonD8.txt',Lon_deg)
+printing('LatD8.txt',Lat_deg)
+printing('nxD8.txt',nextx_deg)
+printing('nyD8.txt',nexty_deg)
+printing('FD.txt', flowDirectionsD8)
+printing('rivw.txt', riverWidth)
+'''
