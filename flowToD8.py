@@ -85,13 +85,13 @@ nexty = fileReading('nexty.txt')
 riverWidth = fileReading('rivwth.txt')
 #indexesForDelete = fileReading('iies.txt')
 
-
+'''
 lon_c = fileReading('lon_c.txt')
 lat_c = fileReading('lat_c.txt')
 nx_new = fileReading('nx_new.txt')
 ny_new = fileReading('ny_new.txt')
 cParams = range(len(lon_c))
-
+'''
 
 #some_dictionaries
 direction_u = {0: 0.5, 45: 0.5, 90: 0,
@@ -315,19 +315,6 @@ for i in lenParams:
                 X = nextx_deg[i]
                 Y = nexty_deg[i]
                 continue
-            else:
-                numU = abs(int(U / 0.5))
-                numV = abs(int(V / 0.5))
-                numMax = max(numU, numV)
-                linearPhi = degComparison(X, Y,
-                                          nextx_deg[i], nexty_deg[i])
-                UU = direction_u.get(linearPhi)
-                VV = direction_v.get(linearPhi)
-                nextx_deg[i] = X + UU
-                nexty_deg[i] = Y + VV
-                X = nextx_deg[i]
-                Y = nexty_deg[i]
-                continue
         if V == 0:
             if abs(U) > 0.5:
                 if nextx_deg[i] > X:
@@ -368,6 +355,7 @@ for i in lenParams:
                         Y = nexty_deg[i + j]
                         j += 1
 
+'''
 for i in cParams:
     for j in lenParams:
         if Lon_deg[j] == lon_c[i] and Lat_deg[j] == lat_c[i] and i != j:
@@ -375,8 +363,9 @@ for i in cParams:
             nexty_deg[j] = ny_new[i]
         else:
             pass
-
 '''
+
+
 #(17:53) -- it's work
 iies = []
 for i in lenParams:
@@ -394,11 +383,27 @@ for i in lenParams:
                     nextx_deg[i] == dictEmulator('x', Lon_deg[i], Lat_deg[i], nextx_deg, nexty_deg, Lon_deg, Lat_deg) and \
                     nexty_deg[i] == dictEmulator('y', Lon_deg[i], Lat_deg[i], nextx_deg, nexty_deg, Lon_deg, Lat_deg):
                 iies.append(i)
-'''
+
 
 #printing('iies.txt', iies)
 
-#print(len(iies))
+print(len(iies))
+
+#long_vectors_finder
+#            else:
+#                numU = abs(int(U / 0.5))
+#                numV = abs(int(V / 0.5))
+#                numMax = max(numU, numV)
+#                linearPhi = degComparison(X, Y,
+#                                          nextx_deg[i], nexty_deg[i])
+#                UU = direction_u.get(linearPhi)
+#                VV = direction_v.get(linearPhi)
+#                nextx_deg[i] = X + UU
+#                nexty_deg[i] = Y + VV
+#                X = nextx_deg[i]
+#                Y = nexty_deg[i]
+#                continue
+
 
 
 '''
