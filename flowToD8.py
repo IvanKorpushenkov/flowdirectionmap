@@ -85,13 +85,13 @@ nexty = fileReading('nexty.txt')
 riverWidth = fileReading('rivwth.txt')
 #indexesForDelete = fileReading('iies.txt')
 
-'''
+
 lon_c = fileReading('lon_c.txt')
 lat_c = fileReading('lat_c.txt')
 nx_new = fileReading('nx_new.txt')
 ny_new = fileReading('ny_new.txt')
 cParams = range(len(lon_c))
-'''
+
 
 #some_dictionaries
 direction_u = {0: 0.5, 45: 0.5, 90: 0,
@@ -227,6 +227,128 @@ printing('nyi.txt', ny_i)
 
 
 #D8_plus_to_D8 (modified 20.02)
+for i in range(len(Lon_deg)):
+    if nextx_deg[i] != -9999 and nexty_deg[i] != -9999:
+        X = Lon_deg[i]
+        Y = Lat_deg[i]
+        U = nextx_deg[i] - Lon_deg[i]
+        V = nexty_deg[i] - Lat_deg[i]
+        if U != 0 and V != 0:
+            if abs(U) > 0.5 and abs(V) > 0.5:
+                if (abs(U) + abs(V)) % U == 0 or \
+                        (abs(U) + abs(V)) % V == 0:
+                    if X < nextx_deg[i] and Y < nexty_deg[i]:
+                        numU = abs(int(U / 0.5))
+                        numV = abs(int(V / 0.5))
+                        maxNum = max(numU, numV)
+                        j = 0
+                        while j < maxNum:
+                            nextx_deg[i + j] = X + 0.5
+                            nexty_deg[i + j] = Y + 0.5
+                            X = nextx_deg[i + j]
+                            Y = nexty_deg[i + j]
+                            riverWidth[i + j] = riverWidth[i]
+                            j += 1
+                            continue
+                    elif X > nextx_deg[i] and Y < nexty_deg[i]:
+                        numU = abs(int(U / 0.5))
+                        numV = abs(int(V / 0.5))
+                        maxNum = max(numU, numV)
+                        j = 0
+                        while j < maxNum:
+                            nextx_deg[i + j] = X - 0.5
+                            nexty_deg[i + j] = Y + 0.5
+                            X = nextx_deg[i + j]
+                            Y = nexty_deg[i + j]
+                            riverWidth[i + j] = riverWidth[i]
+                            j += 1
+                            continue
+                    elif X > nextx_deg[i] and Y > nexty_deg[i]:
+                        numU = abs(int(U / 0.5))
+                        numV = abs(int(V / 0.5))
+                        maxNum = max(numU, numV)
+                        j = 0
+                        while j < maxNum:
+                            nextx_deg[i + j] = X - 0.5
+                            nexty_deg[i + j] = Y - 0.5
+                            X = nextx_deg[i + j]
+                            Y = nexty_deg[i + j]
+                            riverWidth[i + j] = riverWidth[i]
+                            j += 1
+                            continue
+                    elif X < nextx_deg[i] and Y > nexty_deg[i]:
+                        numU = abs(int(U / 0.5))
+                        numV = abs(int(V / 0.5))
+                        maxNum = max(numU, numV)
+                        j = 0
+                        while j < maxNum:
+                            nextx_deg[i + j] = X + 0.5
+                            nexty_deg[i + j] = Y - 0.5
+                            X = nextx_deg[i + j]
+                            Y = nexty_deg[i + j]
+                            riverWidth[i + j] = riverWidth[i]
+                            j += 1
+                            continue
+            elif abs(U) > 0.5 or abs(V) > 0.5:
+                numU = abs(int(U / 0.5))
+                numV = abs(int(V / 0.5))
+                numMax = max(numU, numV)
+                linearPhi = degComparison(X, Y,
+                                          nextx_deg[i], nexty_deg[i])
+                U = direction_u.get(linearPhi)
+                V = direction_v.get(linearPhi)
+                nextx_deg[i] = X + U
+                nexty_deg[i] = Y + V
+                X = nextx_deg[i]
+                Y = nexty_deg[i]
+                continue
+        if V == 0:
+            if abs(U) > 0.5:
+                if nextx_deg[i] > X:
+                    length = int(abs(V) / 0.5)
+                    j = 0
+                    while j <= length:
+                        nextx_deg[i + j] = X + 0.5
+                        X = nextx_deg[i + j]
+                        riverWidth[i + j] = riverWidth[i]
+                        j += 1
+                        continue
+                if nextx_deg[i] < X:
+                    length = int(abs(V) / 0.5)
+                    j = 0
+                    while j <= length:
+                        nextx_deg[i + j] = X - 0.5
+                        X = nextx_deg[i + j]
+                        riverWidth[i + j] = riverWidth[i]
+                        j += 1
+                        continue
+        elif U == 0:
+            if abs(V) > 0.5:
+                if nexty_deg[i] > Y:
+                    length = int(abs(U) / 0.5)
+                    j = 0
+                    while j <= length:
+                        nexty_deg[i + j] = Y + 0.5
+                        Y = nexty_deg[i + j]
+                        riverWidth[i + j] = riverWidth[i]
+                        j += 1
+                        continue
+                if nexty_deg[i] < Y:
+                    length = int(abs(U) / 0.5)
+                    j = 0
+                    while j <= length:
+                        nexty_deg[i + j] = Y - 0.5
+                        riverWidth[i + j] = riverWidth[i]
+                        Y = nexty_deg[i + j]
+                        j += 1
+
+#print(len(long_quiver))
+#printing('long.txt', i)
+
+
+
+'''
+#D8_plus_to_D8 (modified 20.02)
 for i in lenParams:
     if nextx_deg[i] != -9999 and nexty_deg[i] != -9999:
         X = Lon_deg[i]
@@ -295,10 +417,10 @@ for i in lenParams:
                 numMax = max(numU, numV)
                 linearPhi = degComparison(X, Y,
                                           nextx_deg[i], nexty_deg[i])
-                UU = direction_u.get(linearPhi)
-                VV = direction_v.get(linearPhi)
-                nextx_deg[i] = X + UU
-                nexty_deg[i] = Y + VV
+                U = direction_u.get(linearPhi)
+                V = direction_v.get(linearPhi)
+                nextx_deg[i] = X + U
+                nexty_deg[i] = Y + V
                 X = nextx_deg[i]
                 Y = nexty_deg[i]
                 continue
@@ -354,8 +476,10 @@ for i in lenParams:
                         riverWidth[i + j] = riverWidth[i]
                         Y = nexty_deg[i + j]
                         j += 1
-
 '''
+
+
+
 for i in cParams:
     for j in lenParams:
         if Lon_deg[j] == lon_c[i] and Lat_deg[j] == lat_c[i] and i != j:
@@ -363,9 +487,28 @@ for i in cParams:
             nexty_deg[j] = ny_new[i]
         else:
             pass
+
+
+long_quiver_x = []
+long_quiver_y = []
+long_quiver_nx = []
+long_quiver_ny = []
+for i in range(len(Lon_deg)):
+    if nextx_deg[i] != -9999 and nexty_deg[i] != -9999:
+        if abs(nextx_deg[i]) - abs(Lon_deg[i]) > 1 or abs(nexty_deg[i]) - abs(Lat_deg[i]) > 1:
+            long_quiver_x.append(Lon_deg[i])
+            long_quiver_y.append(Lat_deg[i])
+            long_quiver_nx.append(nextx_deg[i])
+            long_quiver_ny.append(nexty_deg[i])
+
+
+printing('long_x.txt', long_quiver_x)
+printing('long_y.txt', long_quiver_y)
+printing('long_nx.txt', long_quiver_nx)
+printing('long_ny.txt', long_quiver_ny)
+
+
 '''
-
-
 #(17:53) -- it's work
 iies = []
 for i in lenParams:
@@ -384,10 +527,11 @@ for i in lenParams:
                     nexty_deg[i] == dictEmulator('y', Lon_deg[i], Lat_deg[i], nextx_deg, nexty_deg, Lon_deg, Lat_deg):
                 iies.append(i)
 
+'''
 
 #printing('iies.txt', iies)
 
-print(len(iies))
+#print(len(iies))
 
 #long_vectors_finder
 #            else:

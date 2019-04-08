@@ -14,6 +14,14 @@ def fileReading(name):
 
     return dim
 
+'''
+def plotting():
+    
+    
+    return
+'''
+
+
 #1.data_processing
 
 #Lon_deg = fileReading('LonD8.txt')
@@ -95,7 +103,7 @@ for i in range(len(Lon_deg1)):
                        scale=1, width=0.008, color='red')
 
 
-
+'''
 #D8_intersections
 for i in range(len(Lon_deg2)):
     if Lon_deg2[i] > -180 and Lon_deg2[i] < -60:
@@ -106,7 +114,7 @@ for i in range(len(Lon_deg2)):
             V = float(nexty_deg2[i]) - float(Lat_deg2[i])
             plt.quiver(X, Y, U, V, angles='xy', scale_units='xy',
                        scale=1, width=0.008, color='blue')
-
+'''
 
 
 '''
